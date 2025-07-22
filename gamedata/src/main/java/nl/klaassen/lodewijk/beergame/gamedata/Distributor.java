@@ -1,8 +1,7 @@
-package nl.klaassen.lodewijk.gamedata;
+package nl.klaassen.lodewijk.beergame.gamedata;
 
 import lombok.Data;
-import nl.klaassen.lodewijk.gamedata.gameplay.ScoreSheet;
-import nl.klaassen.lodewijk.gamedata.identifiers.DistributorId;
+import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
 
 import java.util.Set;
 
@@ -11,7 +10,6 @@ public class Distributor {
     private final DistributorId id;
     private final Set<DistributorId> consumers;
     private final Set<DistributorId> providers;
-    private final ScoreSheet scoreSheet = new ScoreSheet();
 
     public void placeOrder(int amount) {
         if (providers.size() != 1) {

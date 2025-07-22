@@ -1,4 +1,4 @@
-package nl.klaassen.lodewijk.gamedata.identifiers;
+package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
 public enum DistributorType {
     FACTORY_PROVIDER,

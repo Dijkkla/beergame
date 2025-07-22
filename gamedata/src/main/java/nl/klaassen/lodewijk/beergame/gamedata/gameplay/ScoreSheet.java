@@ -1,7 +1,7 @@
-package nl.klaassen.lodewijk.gamedata.gameplay;
+package nl.klaassen.lodewijk.beergame.gamedata.gameplay;
 
 import lombok.Data;
-import nl.klaassen.lodewijk.gamedata.identifiers.DistributorId;
+import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
 
 import java.util.ArrayList;
 import java.util.List;

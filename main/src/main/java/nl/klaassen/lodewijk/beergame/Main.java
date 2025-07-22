@@ -1,8 +1,8 @@
-package nl.klaassen.lodewijk;
+package nl.klaassen.lodewijk.beergame;
 
-import nl.klaassen.lodewijk.gamedata.Distributor;
-import nl.klaassen.lodewijk.gamedata.identifiers.DistributorId;
-import nl.klaassen.lodewijk.gamedata.identifiers.DistributorType;
+import nl.klaassen.lodewijk.beergame.gamedata.Distributor;
+import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
+import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
 
 import java.util.Set;
 
