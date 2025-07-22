@@ -11,31 +11,31 @@ import java.util.TreeSet;
 
 public class Main {
     public static void main(String[] args) {
+        DistributorId wholesaler3 = new DistributorId(DistributorType.WHOLESALER, 3);
+        DistributorId retailer5 = new DistributorId(DistributorType.RETAILER, 5);
+        DistributorId retailer6 = new DistributorId(DistributorType.RETAILER, 6);
+        DistributorId warehouse2 = new DistributorId(DistributorType.WAREHOUSE, 2);
+
         Distributor distributor = new Distributor(
-                new DistributorId(DistributorType.WHOLESALER, 3),
-                Set.of(new DistributorId(DistributorType.RETAILER, 5), new DistributorId(DistributorType.RETAILER, 6)),
-                Set.of(new DistributorId(DistributorType.WAREHOUSE, 2))
+                wholesaler3,
+                Set.of(retailer5, retailer6),
+                Set.of(warehouse2)
         );
 
 //        System.out.println(distributor);
 
 
-        ScoreSheet scoreSheet = new ScoreSheet(
-                distributor.getId(),
-                distributor.getConsumers(),
-                distributor.getProviders(),
-                12, 4, 4
-        );
+        ScoreSheet scoreSheet = new ScoreSheet(distributor, 12, 4, 4);
 
 //        System.out.println(scoreSheet);
 
         Set<GameAction> gameActions = Set.of(
-                new GameAction(1, new DistributorId(DistributorType.RETAILER, 5), new DistributorId(DistributorType.WHOLESALER, 3), 5, GameAction.GameActionType.ORDERS),
-                new GameAction(1, new DistributorId(DistributorType.RETAILER, 6), new DistributorId(DistributorType.WHOLESALER, 3), 7, GameAction.GameActionType.ORDERS),
-                new GameAction(1, new DistributorId(DistributorType.WAREHOUSE, 2), new DistributorId(DistributorType.WHOLESALER, 3), 9, GameAction.GameActionType.GOODS),
-                new GameAction(2, new DistributorId(DistributorType.RETAILER, 5), new DistributorId(DistributorType.WHOLESALER, 3), 6, GameAction.GameActionType.ORDERS),
-                new GameAction(2, new DistributorId(DistributorType.RETAILER, 6), new DistributorId(DistributorType.WHOLESALER, 3), 8, GameAction.GameActionType.ORDERS),
-                new GameAction(2, new DistributorId(DistributorType.WAREHOUSE, 2), new DistributorId(DistributorType.WHOLESALER, 3), 10, GameAction.GameActionType.GOODS)
+                new GameAction(1, retailer5, wholesaler3, 5, GameAction.Type.ORDERS),
+                new GameAction(1, retailer6, wholesaler3, 7, GameAction.Type.ORDERS),
+                new GameAction(1, warehouse2, wholesaler3, 9, GameAction.Type.GOODS),
+                new GameAction(2, retailer5, wholesaler3, 6, GameAction.Type.ORDERS),
+                new GameAction(2, retailer6, wholesaler3, 8, GameAction.Type.ORDERS),
+                new GameAction(2, warehouse2, wholesaler3, 10, GameAction.Type.GOODS)
         );
 
         scoreSheet.nextRound(gameActions);
@@ -44,10 +44,13 @@ public class Main {
         scoreSheet.nextRound(gameActions);
         System.out.println(scoreSheet);
 
+        System.out.println(scoreSheet.get(3, ScoreSheet.Column.INCOMING_ORDERS));
+        System.out.println(scoreSheet.get(3, ScoreSheet.Column.INCOMING_ORDERS, warehouse2));
+
         Set<DistributorId> ts = new TreeSet<>();
-        ts.add(distributor.getId());
-        ts.addAll(distributor.getConsumers());
-        ts.addAll(distributor.getProviders());
+        ts.add(distributor.self());
+        ts.addAll(distributor.consumers());
+        ts.addAll(distributor.providers());
 //        System.out.println(ts);
     }
 }

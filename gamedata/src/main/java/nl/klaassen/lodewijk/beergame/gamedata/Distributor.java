@@ -1,38 +1,44 @@
 package nl.klaassen.lodewijk.beergame.gamedata;
 
-import lombok.Data;
 import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
 
+import java.util.Collection;
 import java.util.Set;
 
-@Data
-public class Distributor {
-    private final DistributorId id;
-    private final Set<DistributorId> consumers;
-    private final Set<DistributorId> providers;
+public record Distributor(DistributorId self, Set<DistributorId> consumers, Set<DistributorId> providers) {
+
+    public Distributor {
+        if (consumers.stream().anyMatch(providers::contains)) {
+            throw new IllegalArgumentException("Distributors may not be registered as both a provider and a consumer");
+        }
+    }
+
+    public Distributor(DistributorId self, Collection<DistributorId> consumers, Collection<DistributorId> providers) {
+        this(self, Set.copyOf(consumers), Set.copyOf(providers));
+    }
 
     public void placeOrder(int amount) {
         if (providers.size() != 1) {
-            throw new IllegalStateException(id + " has more than one provider");
+            throw new IllegalStateException(self + " has more than one provider");
         }
         placeOrder(providers.iterator().next(), amount);
     }
 
     public void placeOrder(DistributorId provider, int amount) {
         if (!providers.contains(provider)) {
-            throw new IllegalArgumentException(provider + " is not a provider of " + id);
+            throw new IllegalArgumentException(provider + " is not a provider of " + self);
         }
     }
 
     public void sendGoods() {
         if (consumers.size() != 1) {
-            throw new IllegalStateException(id + " has more than one consumer");
+            throw new IllegalStateException(self + " has more than one consumer");
         }
     }
 
     public void sendGoods(DistributorId consumer, int amount) {
         if (!consumers.contains(consumer)) {
-            throw new IllegalArgumentException(consumer + " is not a consumer of " + id);
+            throw new IllegalArgumentException(consumer + " is not a consumer of " + self);
         }
     }
 }
