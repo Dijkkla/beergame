@@ -1,6 +1,8 @@
 package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
-public record DistributorId(DistributorType type, int number) {
+import java.util.Comparator;
+
+public record DistributorId(DistributorType type, int number) implements Comparable<DistributorId> {
 //    private static final Collection<DistributorId> existingDistributorIds = new HashSet<>();
 //
 //    // This constructor should not be used. Use the static method `DistributorId.of()` instead.
@@ -22,5 +24,11 @@ public record DistributorId(DistributorType type, int number) {
     @Override
     public String toString() {
         return type.name() + ":" + number;
+    }
+
+    @Override
+    public int compareTo(DistributorId o) {
+        int result = this.type.ordinal() - o.type.ordinal();
+        return result == 0 ? this.number - o.number : result;
     }
 }
