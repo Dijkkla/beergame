@@ -12,25 +12,25 @@ public class ScoreSheet {
     private final List<Entry> entries = new ArrayList<>();
     private final DistributorId self;
     private final Set<DistributorId> consumers;
-    private final Set<DistributorId> providers;
+    private final Set<DistributorId> suppliers;
 
     public ScoreSheet(Distributor distributor, int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
-        this(distributor.self(), distributor.consumers(), distributor.providers(), initialStock, initialIncomingOrders, initialIncomingGoods);
+        this(distributor.self(), distributor.consumers(), distributor.suppliers(), initialStock, initialIncomingOrders, initialIncomingGoods);
     }
 
-    public ScoreSheet(DistributorId self, Collection<DistributorId> consumers, Collection<DistributorId> providers, int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
-        if (consumers.stream().anyMatch(providers::contains)) {
-            throw new IllegalArgumentException("Distributors may not be registered as both a provider and a consumer");
+    public ScoreSheet(DistributorId self, Collection<DistributorId> consumers, Collection<DistributorId> suppliers, int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
+        if (consumers.stream().anyMatch(suppliers::contains)) {
+            throw new IllegalArgumentException("Distributors may not be registered as both a supplier and a consumer");
         }
         this.self = self;
         this.consumers = Set.copyOf(consumers);
-        this.providers = Set.copyOf(providers);
+        this.suppliers = Set.copyOf(suppliers);
         entries.add(new Entry(initialStock, initialIncomingOrders, initialIncomingGoods));
     }
 
     public void nextRound(Collection<GameAction> actions) {
         Collection<GameAction> filteredActions = actions.stream().filter(a -> a.round() == entries.size() && a.to().equals(self)).collect(Collectors.toSet());
-        if (filteredActions.size() != consumers.size() + providers.size()) {
+        if (filteredActions.size() != consumers.size() + suppliers.size()) {
             throw new IllegalArgumentException("Invalid set of gameActions");
         }
         entries.add(new Entry(filteredActions));
@@ -44,13 +44,13 @@ public class ScoreSheet {
         int value;
         if (consumers.contains(distributorId)) {
             value = entries.get(entry - 1).getConsumerData().get(distributorId).get(column);
-        } else if (providers.contains(distributorId)) {
-            value = entries.get(entry - 1).getProviderData().get(distributorId).get(column);
+        } else if (suppliers.contains(distributorId)) {
+            value = entries.get(entry - 1).getSupplierData().get(distributorId).get(column);
         } else {
-            throw new IllegalArgumentException(distributorId + " is neither a consumer nor a provider of " + self);
+            throw new IllegalArgumentException(distributorId + " is neither a consumer nor a supplier of " + self);
         }
         if (value == Integer.MIN_VALUE) {
-            throw new IllegalArgumentException("Cannot get " + column + " from " + (consumers.contains(distributorId) ? "consumer " : "provider ") + distributorId);
+            throw new IllegalArgumentException("Cannot get " + column + " from " + (consumers.contains(distributorId) ? "consumer " : "supplier ") + distributorId);
         } else {
             return value;
         }
@@ -58,7 +58,7 @@ public class ScoreSheet {
 
     @Override
     public String toString() {
-        return "Sheet of " + self + "\n\tConsumers: " + consumers + "\n\tProviders: " + providers + "\n" + entries;
+        return "Sheet of " + self + "\n\tConsumers: " + consumers + "\n\tSuppliers: " + suppliers + "\n" + entries;
     }
 
     public enum Column {
@@ -72,13 +72,13 @@ public class ScoreSheet {
         @Getter
         private final Map<DistributorId, ConsumerEntry> consumerData;
         @Getter
-        private final Map<DistributorId, ProviderEntry> providerData;
+        private final Map<DistributorId, SupplierEntry> supplierData;
 
         public Entry(int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
             this.entryNr = 1;
             this.initialStock = initialStock;
             this.consumerData = consumers.stream().collect(Collectors.toMap(c -> c, c -> new ConsumerEntry(0, initialIncomingOrders)));
-            this.providerData = providers.stream().collect(Collectors.toMap(p -> p, p -> new ProviderEntry(initialIncomingGoods)));
+            this.supplierData = suppliers.stream().collect(Collectors.toMap(s -> s, s -> new SupplierEntry(initialIncomingGoods)));
         }
 
         public Entry(Collection<GameAction> actions) {
@@ -86,21 +86,21 @@ public class ScoreSheet {
             this.entryNr = last.entryNr + 1;
             this.initialStock = last.get(Column.NEW_STOCK);
             this.consumerData = consumers.stream().collect(Collectors.toMap(c -> c, c -> new ConsumerEntry(last.consumerData.get(c).get(Column.NEW_OPEN_ORDERS), actions.stream().filter(a -> a.from().equals(c) && a.type() == GameAction.Type.ORDERS).findAny().get().amount())));
-            this.providerData = providers.stream().collect(Collectors.toMap(p -> p, p -> new ProviderEntry(actions.stream().filter(a -> a.from().equals(p) && a.type() == GameAction.Type.GOODS).findAny().get().amount())));
+            this.supplierData = suppliers.stream().collect(Collectors.toMap(s -> s, s -> new SupplierEntry(actions.stream().filter(a -> a.from().equals(s) && a.type() == GameAction.Type.GOODS).findAny().get().amount())));
         }
 
         public int get(Column column) {
             return switch (column) {
                 case WEEK_NR -> entryNr;
                 case INITIAL_STOCK -> initialStock;
-                case INCOMING_GOODS -> providerData.values().stream().mapToInt(p -> p.incomingGoods).sum();
+                case INCOMING_GOODS -> supplierData.values().stream().mapToInt(s -> s.incomingGoods).sum();
                 case INCOMING_ORDERS -> consumerData.values().stream().mapToInt(c -> c.incomingOrders).sum();
                 case INITIAL_OPEN_ORDERS -> consumerData.values().stream().mapToInt(c -> c.initialOpenOrders).sum();
                 case OUTGOING_GOODS -> consumerData.values().stream().mapToInt(c -> c.outgoingGoods).sum();
                 case NEW_OPEN_ORDERS ->
                         consumerData.values().stream().mapToInt(c -> c.get(Column.NEW_OPEN_ORDERS)).sum();
                 case NEW_STOCK -> initialStock + get(Column.INCOMING_GOODS) - get(Column.OUTGOING_GOODS);
-                case OUTGOING_ORDERS -> providerData.values().stream().mapToInt(p -> p.outgoingOrders).sum();
+                case OUTGOING_ORDERS -> supplierData.values().stream().mapToInt(s -> s.outgoingOrders).sum();
             };
         }
 
@@ -118,7 +118,7 @@ public class ScoreSheet {
                 toStringHelper(c, get(c), sb);
             }
             consumers.stream().sorted().forEach(c -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - c.toString().length()))).append(c).append(consumerData.get(c).toString()));
-            providers.stream().sorted().forEach(p -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - p.toString().length()))).append(p).append(providerData.get(p).toString()));
+            suppliers.stream().sorted().forEach(s -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - s.toString().length()))).append(s).append(supplierData.get(s).toString()));
             sb.append("\n");
             return sb.toString();
         }
@@ -158,11 +158,11 @@ public class ScoreSheet {
             }
         }
 
-        private class ProviderEntry {
+        private class SupplierEntry {
             private final int incomingGoods;
             private int outgoingOrders;
 
-            public ProviderEntry(int incomingGoods) {
+            public SupplierEntry(int incomingGoods) {
                 this.incomingGoods = incomingGoods;
             }
 

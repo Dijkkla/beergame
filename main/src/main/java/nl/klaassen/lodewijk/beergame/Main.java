@@ -50,7 +50,7 @@ public class Main {
         Set<DistributorId> ts = new TreeSet<>();
         ts.add(distributor.self());
         ts.addAll(distributor.consumers());
-        ts.addAll(distributor.providers());
+        ts.addAll(distributor.suppliers());
 //        System.out.println(ts);
     }
 }
