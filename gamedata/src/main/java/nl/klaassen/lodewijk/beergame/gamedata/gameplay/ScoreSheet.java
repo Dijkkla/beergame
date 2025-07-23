@@ -1,6 +1,5 @@
 package nl.klaassen.lodewijk.beergame.gamedata.gameplay;
 
-import lombok.Getter;
 import nl.klaassen.lodewijk.beergame.gamedata.Distributor;
 import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
 
@@ -43,9 +42,9 @@ public class ScoreSheet {
     public int get(int entry, Column column, DistributorId distributorId) {
         int value;
         if (consumers.contains(distributorId)) {
-            value = entries.get(entry - 1).getConsumerData().get(distributorId).get(column);
+            value = entries.get(entry - 1).getFromConsumer(column, distributorId);
         } else if (suppliers.contains(distributorId)) {
-            value = entries.get(entry - 1).getSupplierData().get(distributorId).get(column);
+            value = entries.get(entry - 1).getFromSupplier(column, distributorId);
         } else {
             throw new IllegalArgumentException(distributorId + " is neither a consumer nor a supplier of " + self);
         }
@@ -69,9 +68,7 @@ public class ScoreSheet {
         private final int entryNr;
         private final int initialStock;
 
-        @Getter
         private final Map<DistributorId, ConsumerEntry> consumerData;
-        @Getter
         private final Map<DistributorId, SupplierEntry> supplierData;
 
         public Entry(int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
@@ -87,6 +84,14 @@ public class ScoreSheet {
             this.initialStock = last.get(Column.NEW_STOCK);
             this.consumerData = consumers.stream().collect(Collectors.toMap(c -> c, c -> new ConsumerEntry(last.consumerData.get(c).get(Column.NEW_OPEN_ORDERS), actions.stream().filter(a -> a.from().equals(c) && a.type() == GameAction.Type.ORDERS).findAny().get().amount())));
             this.supplierData = suppliers.stream().collect(Collectors.toMap(s -> s, s -> new SupplierEntry(actions.stream().filter(a -> a.from().equals(s) && a.type() == GameAction.Type.GOODS).findAny().get().amount())));
+        }
+
+        public int getFromConsumer(Column column, DistributorId distributorId) {
+            return consumerData.get(distributorId).get(column);
+        }
+
+        public int getFromSupplier(Column column, DistributorId distributorId) {
+            return supplierData.get(distributorId).get(column);
         }
 
         public int get(Column column) {
