@@ -1,7 +1,5 @@
 package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
-import java.util.TreeSet;
-
 public enum DistributorType {
     FACTORY_SUPPLIER(Integer.MIN_VALUE),
     FACTORY(1),
