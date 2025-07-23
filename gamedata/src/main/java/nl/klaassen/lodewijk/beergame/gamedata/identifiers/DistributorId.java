@@ -1,6 +1,6 @@
 package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
-import java.util.Comparator;
+import java.util.Objects;
 
 public record DistributorId(DistributorType type, int number) implements Comparable<DistributorId> {
 //    private static final Collection<DistributorId> existingDistributorIds = new HashSet<>();
@@ -28,7 +28,8 @@ public record DistributorId(DistributorType type, int number) implements Compara
 
     @Override
     public int compareTo(DistributorId o) {
-        int result = this.type.ordinal() - o.type.ordinal();
+        Objects.requireNonNull(o);
+        int result = this.type.hierarchy - o.type.hierarchy;
         return result == 0 ? this.number - o.number : result;
     }
 }
