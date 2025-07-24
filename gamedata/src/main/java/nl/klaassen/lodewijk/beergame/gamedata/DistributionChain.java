@@ -6,8 +6,13 @@ import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
 import java.util.*;
 
 public class DistributionChain {
-    private static final Set<DistributorId> FINAL_COMSUMER_SET = Set.of(new DistributorId(DistributorType.FINAL_CONSUMER, 1));
-    private static final Set<DistributorId> FIRST_SUPPLIER_SET = Set.of(new DistributorId(DistributorType.FIRST_SUPPLIER, 1));
+    public static final Set<DistributorId> FINAL_COMSUMER_SET = Set.of(new DistributorId(DistributorType.FINAL_CONSUMER, 1));
+    public static final Set<DistributorId> FIRST_SUPPLIER_SET = Set.of(new DistributorId(DistributorType.FIRST_SUPPLIER, 1));
+
+    public Set<Distributor> getDistributors() {
+        return distributors;
+    }
+
     private final Set<Distributor> distributors;
     private final int numberOfSuppliers;
     private final int numberOfConsumers;
@@ -23,10 +28,13 @@ public class DistributionChain {
 
     private DistributionChain(int numberOfSuppliers, int numberOfConsumers, DistributorType[] distributorTypes) {
         if (numberOfSuppliers <= 0) {
-            throw new IllegalArgumentException("number of suppliers must be 1 or greater (was " + numberOfSuppliers + ")");
+            throw new IllegalArgumentException("Number of suppliers must be 1 or greater (was " + numberOfSuppliers + ")");
         }
         if (numberOfConsumers <= 0) {
-            throw new IllegalArgumentException("number of consumers must be 1 or greater (was " + numberOfConsumers + ")");
+            throw new IllegalArgumentException("Number of consumers must be 1 or greater (was " + numberOfConsumers + ")");
+        }
+        if (distributorTypes.length <= 1) {
+            throw new IllegalArgumentException("A distribution chain must have at least 2 types of distributors");
         }
         this.numberOfSuppliers = numberOfSuppliers;
         this.numberOfConsumers = numberOfConsumers;
@@ -62,7 +70,12 @@ public class DistributionChain {
     }
 
     public Distributor getDistributor(DistributorId distributorId) {
-        return distributors.stream().filter(d -> d.self.equals(distributorId)).findFirst().orElse(null);
+        //TODO: throw an exception instead of returning null if the distributor does not exist?
+        return distributors.stream().filter(d -> d.self.equals(distributorId)).findAny().orElse(null);
+    }
+
+    public Distributor getDistributor(DistributorType type, int number) {
+        return getDistributor(new DistributorId(type, number));
     }
 
     @Override

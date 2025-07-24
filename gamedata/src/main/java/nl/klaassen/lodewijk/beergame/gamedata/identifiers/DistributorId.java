@@ -1,12 +1,6 @@
 package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
 public record DistributorId(DistributorType type, int number) implements Comparable<DistributorId> {
-    public DistributorId {
-        if (number <= 0) {
-            throw new IllegalArgumentException("number must be 1 or greater");
-        }
-    }
-
     @Override
     public String toString() {
         return type.name() + ":" + number;
