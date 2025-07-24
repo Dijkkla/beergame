@@ -96,7 +96,7 @@ public class ScoreSheet {
             Entry last = entries.getLast();
             this.entryNr = last.entryNr + 1;
             this.initialStock = last.get(Column.NEW_STOCK);
-            this.consumerData = distributor.consumers().stream().collect(Collectors.toMap(c -> c, c -> new ConsumerEntry(last.consumerData.get(c).get(Column.NEW_OPEN_ORDERS), actions.stream().filter(a -> a.from().equals(c) && a.type() == GameAction.Type.ORDERS).findAny().get().amount())));
+            this.consumerData = distributor.consumers().stream().collect(Collectors.toMap(c -> c, c -> new ConsumerEntry(last.getFromConsumer(Column.NEW_OPEN_ORDERS, c), actions.stream().filter(a -> a.from().equals(c) && a.type() == GameAction.Type.ORDERS).findAny().get().amount())));
             this.supplierData = distributor.suppliers().stream().collect(Collectors.toMap(s -> s, s -> new SupplierEntry(actions.stream().filter(a -> a.from().equals(s) && a.type() == GameAction.Type.GOODS).findAny().get().amount())));
         }
 
@@ -127,8 +127,7 @@ public class ScoreSheet {
         public String toString() {
             final int LEFT_PAD = 16;
             StringBuilder sb = new StringBuilder();
-            String entryNrString = Integer.toString(entryNr);
-            sb.append("\n").append(" ".repeat(LEFT_PAD - 9 - entryNrString.length())).append("ENTRY_NR:").append(entryNrString);
+            sb.append("\n").append(" ".repeat(LEFT_PAD));
             for (Column c : Column.values()) {
                 sb.append(" | ").append(c);
             }
@@ -136,8 +135,8 @@ public class ScoreSheet {
             for (Column c : Column.values()) {
                 toStringHelper(c, get(c), sb);
             }
-            distributor.consumers().stream().sorted().forEach(c -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - c.toString().length()))).append(c).append(consumerData.get(c).toString()));
-            distributor.suppliers().stream().sorted().forEach(s -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - s.toString().length()))).append(s).append(supplierData.get(s).toString()));
+            distributor.consumers().stream().sorted().forEachOrdered(c -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - c.toString().length()))).append(c).append(consumerData.get(c).toString()));
+            distributor.suppliers().stream().sorted().forEachOrdered(s -> sb.append("\n").append(" ".repeat(Math.max(0, LEFT_PAD - s.toString().length()))).append(s).append(supplierData.get(s).toString()));
             sb.append("\n");
             return sb.toString();
         }

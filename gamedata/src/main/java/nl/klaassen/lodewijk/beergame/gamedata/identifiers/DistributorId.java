@@ -1,7 +1,5 @@
 package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
-import java.util.Objects;
-
 public record DistributorId(DistributorType type, int number) implements Comparable<DistributorId> {
     public DistributorId {
         if (number <= 0) {

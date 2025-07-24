@@ -1,66 +1,11 @@
 package nl.klaassen.lodewijk.beergame;
 
 import nl.klaassen.lodewijk.beergame.gamedata.DistributionChain;
-import nl.klaassen.lodewijk.beergame.gamedata.gameplay.GameAction;
-import nl.klaassen.lodewijk.beergame.gamedata.gameplay.ScoreSheet;
-import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
-import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
-
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class Main {
     public static void main(String[] args) {
-        DistributorId wholesaler3 = new DistributorId(DistributorType.WHOLESALER, 3);
-        DistributorId retailer5 = new DistributorId(DistributorType.RETAILER, 5);
-        DistributorId retailer6 = new DistributorId(DistributorType.RETAILER, 6);
-        DistributorId warehouse2 = new DistributorId(DistributorType.WAREHOUSE, 2);
+        DistributionChain distributionChain = new DistributionChain(3, 7);
 
-        DistributionChain.Distributor distributor = new DistributionChain.Distributor(
-                new DistributionChain(1,1),
-                wholesaler3,
-                Set.of(retailer5, retailer6),
-                Set.of(warehouse2)
-        );
-
-//        System.out.println(distributor);
-
-
-        ScoreSheet scoreSheet = new ScoreSheet(distributor, 12, 4, 4);
-
-//        System.out.println(scoreSheet);
-
-        Set<GameAction> gameActions = Set.of(
-                new GameAction(1, retailer5, wholesaler3, 5, GameAction.Type.ORDERS),
-                new GameAction(1, retailer6, wholesaler3, 7, GameAction.Type.ORDERS),
-                new GameAction(1, warehouse2, wholesaler3, 9, GameAction.Type.GOODS),
-                new GameAction(2, retailer5, wholesaler3, 6, GameAction.Type.ORDERS),
-                new GameAction(2, retailer6, wholesaler3, 8, GameAction.Type.ORDERS),
-                new GameAction(2, warehouse2, wholesaler3, 10, GameAction.Type.GOODS)
-        );
-
-        scoreSheet.nextRound(gameActions);
-//        System.out.println(scoreSheet);
-
-        scoreSheet.nextRound(gameActions);
-//        System.out.println(scoreSheet);
-
-//        System.out.println(scoreSheet.get(3, ScoreSheet.Column.INCOMING_ORDERS));
-//        System.out.println(scoreSheet.get(3, ScoreSheet.Column.INCOMING_ORDERS, warehouse2));
-
-        Set<DistributorId> ts = new TreeSet<>();
-        ts.add(distributor.self());
-        ts.addAll(distributor.consumers());
-        ts.addAll(distributor.suppliers());
-//        System.out.println(ts);
-
-        new DistributionChain(1, 2);
-//        new DistributionChain(2, 3);
-        EnumSet<DistributorType> enumSet = EnumSet.of(DistributorType.RETAILER, DistributorType.FACTORY);
-        new DistributionChain(2, 2, enumSet);
-        new DistributionChain(2, 3, enumSet);
-        enumSet.add(DistributorType.WAREHOUSE);
-        new DistributionChain(2, 3, enumSet);
+        System.out.println(distributionChain);
     }
 }

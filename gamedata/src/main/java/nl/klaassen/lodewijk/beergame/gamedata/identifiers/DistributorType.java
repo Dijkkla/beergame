@@ -1,16 +1,17 @@
 package nl.klaassen.lodewijk.beergame.gamedata.identifiers;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 public enum DistributorType {
-    TOP_LEVEL_SUPPLIER(Integer.MIN_VALUE, false),
+    FIRST_SUPPLIER(Integer.MIN_VALUE, false),
     FACTORY(1),
     WAREHOUSE(2),
     WHOLESALER(3),
     RETAILER(4),
-    TOP_LEVEL_CONSUMER(Integer.MAX_VALUE, false);
+    FINAL_CONSUMER(Integer.MAX_VALUE, false);
 
-    public final boolean canBeDistributor;
+    private final boolean canBeDistributor;
     private final int hierarchy;
 
     DistributorType(int hierarchy) {
@@ -25,5 +26,9 @@ public enum DistributorType {
 
     public static Comparator<DistributorType> getComparator() {
         return Comparator.comparingInt(distributorType -> distributorType.hierarchy);
+    }
+
+    public static DistributorType[] getDistributorTypes() {
+        return Arrays.stream(values()).filter(t -> t.canBeDistributor).sorted(getComparator()).toArray(DistributorType[]::new);
     }
 }

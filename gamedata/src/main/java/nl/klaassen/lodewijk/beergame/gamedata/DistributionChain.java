@@ -6,35 +6,70 @@ import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
 import java.util.*;
 
 public class DistributionChain {
-    private final DistributorId factorySupplier = new DistributorId(DistributorType.TOP_LEVEL_SUPPLIER, 1);
-    //    private final Set<Distributor> distributors;
-    private final DistributorId retailerConsumer = new DistributorId(DistributorType.TOP_LEVEL_CONSUMER, 1);
+    private static final Set<DistributorId> FINAL_COMSUMER_SET = Set.of(new DistributorId(DistributorType.FINAL_CONSUMER, 1));
+    private static final Set<DistributorId> FIRST_SUPPLIER_SET = Set.of(new DistributorId(DistributorType.FIRST_SUPPLIER, 1));
+    private final Set<Distributor> distributors;
+    private final int numberOfSuppliers;
+    private final int numberOfConsumers;
+    private final DistributorType[] distributorTypes;
 
     public DistributionChain(int numberOfSuppliers, int numberOfConsumers) {
-        this(numberOfSuppliers, numberOfConsumers, Arrays.stream(DistributorType.values()).distinct().filter(t -> t.canBeDistributor).toArray(DistributorType[]::new));
+        this(numberOfSuppliers, numberOfConsumers, DistributorType.getDistributorTypes());
     }
 
     public DistributionChain(int numberOfSuppliers, int numberOfConsumers, Collection<DistributorType> distributorTypes) {
-        this(numberOfSuppliers, numberOfConsumers, distributorTypes.stream().distinct().filter(t -> t.canBeDistributor).toArray(DistributorType[]::new));
+        this(numberOfSuppliers, numberOfConsumers, Arrays.stream(DistributorType.getDistributorTypes()).distinct().filter(distributorTypes::contains).sorted(DistributorType.getComparator()).toArray(DistributorType[]::new));
     }
 
     private DistributionChain(int numberOfSuppliers, int numberOfConsumers, DistributorType[] distributorTypes) {
-        Arrays.sort(distributorTypes, DistributorType.getComparator());
         if (numberOfSuppliers <= 0) {
             throw new IllegalArgumentException("number of suppliers must be 1 or greater (was " + numberOfSuppliers + ")");
         }
         if (numberOfConsumers <= 0) {
             throw new IllegalArgumentException("number of consumers must be 1 or greater (was " + numberOfConsumers + ")");
         }
-        System.out.println(Arrays.toString(distributorTypes));
-        Set<DistributorId> distributorIds = new HashSet<>();
-        for (int distributorTypeIndex = 0; distributorTypeIndex < distributorTypes.length; distributorTypeIndex++) {
-            int numberOfDistributorsOfType = (int) (Math.pow(numberOfConsumers, distributorTypeIndex) * Math.pow(numberOfSuppliers, (distributorTypes.length - distributorTypeIndex)));
-            for (int distributorNumber = 0; distributorNumber < numberOfDistributorsOfType; distributorNumber++) {
-                distributorIds.add(new DistributorId(distributorTypes[distributorTypeIndex], distributorNumber + 1));
+        this.numberOfSuppliers = numberOfSuppliers;
+        this.numberOfConsumers = numberOfConsumers;
+        this.distributorTypes = distributorTypes;
+
+        Map<DistributorId, Set<DistributorId>> supplierMap = new HashMap<>();
+        Map<DistributorId, Set<DistributorId>> consumerMap = new HashMap<>();
+
+        for (int distributionLayer = 0; distributionLayer < distributorTypes.length - 1; distributionLayer++) {
+            int layerSize = (int) Math.pow(numberOfSuppliers, distributorTypes.length - 1 - distributionLayer) * (int) Math.pow(numberOfConsumers, distributionLayer);
+            int nextLayerSize = layerSize / numberOfSuppliers * numberOfConsumers;
+            for (int s = 0; s < layerSize; s++) {
+                int supplierNumber = s + 1;
+                DistributorId supplier = new DistributorId(distributorTypes[distributionLayer], supplierNumber);
+                for (int c = 0; c < numberOfConsumers; c++) {
+                    int consumerNumber = (s * numberOfConsumers + c) % nextLayerSize + 1;
+                    DistributorId consumer = new DistributorId(distributorTypes[distributionLayer + 1], consumerNumber);
+                    supplierMap.computeIfAbsent(supplier, set -> new HashSet<>()).add(consumer);
+                    consumerMap.computeIfAbsent(consumer, set -> new HashSet<>()).add(supplier);
+                }
             }
         }
-        System.out.println(distributorIds.stream().sorted().toList());
+
+        Set<DistributorId> allIds = new HashSet<>();
+        allIds.addAll(supplierMap.keySet());
+        allIds.addAll(consumerMap.keySet());
+        Set<Distributor> tmpDistributors = new HashSet<>();
+
+        for (DistributorId id : allIds) {
+            tmpDistributors.add(new Distributor(this, id, Set.copyOf(supplierMap.getOrDefault(id, FINAL_COMSUMER_SET)), Set.copyOf(consumerMap.getOrDefault(id, FIRST_SUPPLIER_SET))));
+        }
+        distributors = Set.copyOf(tmpDistributors);
+    }
+
+    public Distributor getDistributor(DistributorId distributorId) {
+        return distributors.stream().filter(d -> d.self.equals(distributorId)).findFirst().orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        distributors.stream().sorted().forEachOrdered(distributor -> sb.append("\n").append(distributor.suppliers.stream().sorted().toList()).append(" -> ").append(distributor.self).append(" -> ").append(distributor.consumers.stream().sorted().toList()));
+        return sb.toString();
     }
 
     public record Distributor(DistributionChain chain, DistributorId self, Set<DistributorId> consumers,
