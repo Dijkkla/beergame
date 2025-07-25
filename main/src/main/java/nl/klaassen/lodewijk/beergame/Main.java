@@ -23,8 +23,8 @@ public class Main {
         }
 
         DistributorType distributorType = Arrays.stream(DistributorType.getDistributorTypes()).findAny().get();
-        int distributerNumber = new Random().nextInt(distributionChain.getAmountOfDistributorsOfType(distributorType));
-        ScoreSheet scoreSheet = new ScoreSheet(distributionChain.getDistributor(distributorType, distributerNumber), 12, 4, 4);
+        int distributorNumber = new Random().nextInt(distributionChain.getAmountOfDistributorsOfType(distributorType));
+        ScoreSheet scoreSheet = new ScoreSheet(distributionChain.getDistributor(distributorType, distributorNumber), 12, 4, 4);
         scoreSheet.nextRound(Set.of());
     }
 }
