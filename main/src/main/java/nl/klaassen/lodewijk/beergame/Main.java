@@ -6,14 +6,13 @@ import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
 
 public class Main {
     public static void main(String[] args) {
-        DistributionChain distributionChain = new DistributionChain(3, 7);
+        DistributionChain distributionChain = new DistributionChain(1, 3, 7);
 
         System.out.println(distributionChain);
 
         for (DistributorType type : DistributorType.getDistributorTypes()) {
-            int number;
-            if ((number = distributionChain.getAmountOfDistributorsOfType(type)) > 0) {
-                DistributionChain.Distributor distributor = distributionChain.getDistributor(type, number);
+            DistributionChain.Distributor distributor = distributionChain.getDistributor(type, distributionChain.getAmountOfDistributorsOfType(type));
+            if (distributor != null) {
                 ScoreSheet scoreSheet = new ScoreSheet(distributor, 12, 4, 4);
                 System.out.println(scoreSheet);
             }
