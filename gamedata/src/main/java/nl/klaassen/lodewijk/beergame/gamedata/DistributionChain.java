@@ -4,19 +4,14 @@ import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
 import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DistributionChain {
-    public static final Set<DistributorId> FINAL_COMSUMER_SET = Set.of(new DistributorId(DistributorType.FINAL_CONSUMER, 1));
-    public static final Set<DistributorId> FIRST_SUPPLIER_SET = Set.of(new DistributorId(DistributorType.FIRST_SUPPLIER, 1));
-
-    public Set<Distributor> getDistributors() {
-        return distributors;
-    }
-
     private final Set<Distributor> distributors;
     private final int numberOfSuppliers;
     private final int numberOfConsumers;
-    private final DistributorType[] distributorTypes;
+    private final Map<DistributorType, Integer> amountOfDistributorsByType;
+    private final int size;
 
     public DistributionChain(int numberOfSuppliers, int numberOfConsumers) {
         this(numberOfSuppliers, numberOfConsumers, DistributorType.getDistributorTypes());
@@ -35,10 +30,12 @@ public class DistributionChain {
         }
         if (distributorTypes.length <= 1) {
             throw new IllegalArgumentException("A distribution chain must have at least 2 types of distributors");
+        } else if (Arrays.stream(distributorTypes).distinct().count() != distributorTypes.length) {
+            throw new IllegalArgumentException("A distributor type may not be used more than once in a distribution chain");
         }
         this.numberOfSuppliers = numberOfSuppliers;
         this.numberOfConsumers = numberOfConsumers;
-        this.distributorTypes = distributorTypes;
+        this.amountOfDistributorsByType = new EnumMap<>(DistributorType.class);
 
         Map<DistributorId, Set<DistributorId>> supplierMap = new HashMap<>();
         Map<DistributorId, Set<DistributorId>> consumerMap = new HashMap<>();
@@ -46,6 +43,8 @@ public class DistributionChain {
         for (int distributionLayer = 0; distributionLayer < distributorTypes.length - 1; distributionLayer++) {
             int layerSize = (int) Math.pow(numberOfSuppliers, distributorTypes.length - 1 - distributionLayer) * (int) Math.pow(numberOfConsumers, distributionLayer);
             int nextLayerSize = layerSize / numberOfSuppliers * numberOfConsumers;
+            amountOfDistributorsByType.putIfAbsent(distributorTypes[distributionLayer], layerSize);
+            amountOfDistributorsByType.putIfAbsent(distributorTypes[distributionLayer + 1], nextLayerSize);
             for (int s = 0; s < layerSize; s++) {
                 int supplierNumber = s + 1;
                 DistributorId supplier = new DistributorId(distributorTypes[distributionLayer], supplierNumber);
@@ -57,20 +56,20 @@ public class DistributionChain {
                 }
             }
         }
+        size = amountOfDistributorsByType.values().stream().mapToInt(i -> i).sum();
 
         Set<DistributorId> allIds = new HashSet<>();
         allIds.addAll(supplierMap.keySet());
         allIds.addAll(consumerMap.keySet());
-        Set<Distributor> tmpDistributors = new HashSet<>();
 
-        for (DistributorId id : allIds) {
-            tmpDistributors.add(new Distributor(this, id, Set.copyOf(supplierMap.getOrDefault(id, FINAL_COMSUMER_SET)), Set.copyOf(consumerMap.getOrDefault(id, FIRST_SUPPLIER_SET))));
-        }
-        distributors = Set.copyOf(tmpDistributors);
+        distributors = Set.copyOf(allIds.stream().map(id -> new Distributor(this, id, Set.copyOf(supplierMap.getOrDefault(id, Set.of(new DistributorId(DistributorType.FINAL_CONSUMER, 1)))), Set.copyOf(consumerMap.getOrDefault(id, Set.of(new DistributorId(DistributorType.FIRST_SUPPLIER, 1)))))).collect(Collectors.toSet()));
+    }
+
+    public int getAmountOfDistributorsOfType(DistributorType type) {
+        return amountOfDistributorsByType.get(type);
     }
 
     public Distributor getDistributor(DistributorId distributorId) {
-        //TODO: throw an exception instead of returning null if the distributor does not exist?
         return distributors.stream().filter(d -> d.self.equals(distributorId)).findAny().orElse(null);
     }
 
@@ -81,7 +80,11 @@ public class DistributionChain {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        distributors.stream().sorted().forEachOrdered(distributor -> sb.append("\n").append(distributor.suppliers.stream().sorted().toList()).append(" -> ").append(distributor.self).append(" -> ").append(distributor.consumers.stream().sorted().toList()));
+        sb.append("Distribution chain consisting of ").append(size).append(" distributors (");
+        amountOfDistributorsByType.forEach((key, value) -> sb.append(value).append(" ").append(key).append("s, "));
+        sb.setLength(sb.length() - 2);
+        sb.append(") each having ").append(numberOfSuppliers).append(" suppliers and ").append(numberOfConsumers).append(" consumers");
+//        distributors.stream().sorted().forEachOrdered(distributor -> sb.append("\n").append(distributor.suppliers.stream().sorted().toList()).append(" -> ").append(distributor.self).append(" -> ").append(distributor.consumers.stream().sorted().toList()));
         return sb.toString();
     }
 
