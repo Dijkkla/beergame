@@ -29,13 +29,13 @@ public class ScoreSheet {
         }
     }
 
-    public void sendGoods() {
+    public void deliverGoods() {
         if (distributor.consumers().size() != 1) {
             throw new IllegalStateException(distributor.self() + " has more than one consumer");
         }
     }
 
-    public void sendGoods(DistributorId consumer, int amount) {
+    public void deliverGoods(DistributorId consumer, int amount) {
         if (!distributor.consumers().contains(consumer)) {
             throw new IllegalArgumentException(consumer + " is not a consumer of " + distributor.self());
         }
@@ -71,7 +71,7 @@ public class ScoreSheet {
 
     @Override
     public String toString() {
-        return "Sheet of " + distributor.self() + "\n\tConsumers: " + distributor.consumers() + "\n\tSuppliers: " + distributor.suppliers() + "\n" + entries;
+        return "Score sheet of " + distributor.self() + "\n\tConsumers: " + distributor.consumers() + "\n\tSuppliers: " + distributor.suppliers() + "\n" + entries;
     }
 
     public enum Column {
@@ -125,7 +125,7 @@ public class ScoreSheet {
 
         @Override
         public String toString() {
-            final int LEFT_PAD = 16;
+            final int LEFT_PAD = 24;
             StringBuilder sb = new StringBuilder();
             sb.append("\n").append(" ".repeat(LEFT_PAD));
             for (Column c : Column.values()) {
