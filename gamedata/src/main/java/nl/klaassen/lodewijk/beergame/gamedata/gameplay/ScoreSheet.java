@@ -131,7 +131,7 @@ public class ScoreSheet {
             for (Column c : Column.values()) {
                 sb.append(" | ").append(c);
             }
-            sb.append("\n").append(" ".repeat(LEFT_PAD - 5)).append("TOTAL");
+            sb.append("\n").append(" ".repeat(LEFT_PAD));
             for (Column c : Column.values()) {
                 toStringHelper(c, get(c), sb);
             }
