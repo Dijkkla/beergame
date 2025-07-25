@@ -74,6 +74,7 @@ public class DistributionChain {
     }
 
     public Distributor getDistributor(DistributorId distributorId) {
+        if (distributorId.chainNumber() != number) return null;
         return distributors.stream().filter(d -> d.self.equals(distributorId)).findAny().orElse(null);
     }
 
@@ -98,6 +99,11 @@ public class DistributionChain {
             if (consumers.stream().anyMatch(suppliers::contains)) {
                 throw new IllegalArgumentException("Distributors may not be registered as both a supplier and a consumer");
             }
+        }
+
+        @Override
+        public String toString() {
+            return self + " (consumers=" + consumers.stream().sorted().toList() + ", suppliers=" + suppliers.stream().sorted().toList() + ")";
         }
 
         @Override
