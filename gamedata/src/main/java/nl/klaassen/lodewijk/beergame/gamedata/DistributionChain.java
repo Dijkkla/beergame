@@ -94,6 +94,9 @@ public class DistributionChain {
     public record Distributor(DistributorId self, Set<DistributorId> consumers,
                               Set<DistributorId> suppliers) implements Comparable<Distributor> {
         public Distributor {
+            if (self == null || consumers == null || suppliers == null || consumers.isEmpty() || suppliers.isEmpty()) {
+                throw new IllegalArgumentException("No component of a Distributor record may be null or empty");
+            }
             if (consumers.stream().anyMatch(suppliers::contains)) {
                 throw new IllegalArgumentException("Distributors may not be registered as both a supplier and a consumer");
             }
