@@ -40,6 +40,7 @@ public class ScoreSheet {
         if (distributor.consumers().size() != 1) {
             throw new IllegalStateException(distributor.self() + " has more than one consumer");
         }
+        deliverGoods(distributor.consumers().iterator().next(), entries.getLast().requiredOutgoingGoods());
     }
 
     public void deliverGoods(DistributorId consumer, int amount) {
@@ -52,7 +53,11 @@ public class ScoreSheet {
     public void nextRound(Collection<GameAction> actions) {
         Entry last = entries.getLast();
         if (last.requiredOutgoingGoods() != last.get(Column.OUTGOING_GOODS)) {
-            throw new IllegalStateException("Outgoing goods needs to be " + last.requiredOutgoingGoods() + last);
+            if (distributor.consumers().size() == 1) {
+                deliverGoods();
+            } else {
+                throw new IllegalStateException("Outgoing goods needs to be " + last.requiredOutgoingGoods() + last);
+            }
         }
         Collection<GameAction> filteredActions = actions.stream()
                 .filter(this::relevantGameAction)
