@@ -74,7 +74,6 @@ public class DistributionChain {
     }
 
     public Distributor getDistributor(DistributorId distributorId) {
-        if (distributorId.chainNumber() != chainNumber) return null;
         return distributors.stream().filter(d -> d.self.equals(distributorId)).findAny().orElse(null);
     }
 
@@ -89,7 +88,6 @@ public class DistributionChain {
         amountOfDistributorsByType.forEach((key, value) -> sb.append(value).append(" ").append(key).append("s, "));
         sb.setLength(sb.length() - 2);
         sb.append("), with each distributor having ").append(numberOfSuppliers).append(" suppliers and ").append(numberOfConsumers).append(" consumers");
-//        distributors.stream().sorted().forEachOrdered(distributor -> sb.append("\n").append(distributor.suppliers.stream().sorted().toList()).append(" -> ").append(distributor.self).append(" -> ").append(distributor.consumers.stream().sorted().toList()));
         return sb.toString();
     }
 
