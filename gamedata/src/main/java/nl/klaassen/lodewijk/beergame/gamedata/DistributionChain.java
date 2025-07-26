@@ -94,9 +94,11 @@ public class DistributionChain {
     public record Distributor(DistributorId self, Set<DistributorId> consumers,
                               Set<DistributorId> suppliers) implements Comparable<Distributor> {
         public Distributor {
-            if (self == null || consumers == null || suppliers == null || consumers.isEmpty() || suppliers.isEmpty()) {
-                throw new IllegalArgumentException("No component of a Distributor record may be null or empty");
-            }
+            Objects.requireNonNull(self, "self must not be null");
+            Objects.requireNonNull(suppliers, "suppliers must not be null");
+            Objects.requireNonNull(consumers, "consumers must not be null");
+            if (consumers.isEmpty()) throw new IllegalArgumentException("consumers must not be empty");
+            if (suppliers.isEmpty()) throw new IllegalArgumentException("suppliers must not be empty");
             if (consumers.stream().anyMatch(suppliers::contains)) {
                 throw new IllegalArgumentException("Distributors may not be registered as both a supplier and a consumer");
             }
