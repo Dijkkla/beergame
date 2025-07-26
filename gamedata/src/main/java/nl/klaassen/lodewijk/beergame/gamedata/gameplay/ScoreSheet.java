@@ -131,12 +131,12 @@ public class ScoreSheet {
             this.entryNr = last.entryNr + 1;
             this.initialStock = last.get(Column.NEW_STOCK);
             this.supplierData = distributor.suppliers().stream().collect(Collectors.toMap(s -> s, s -> {
-                int incomingGoods = actions.stream().filter(a -> a.from().equals(s) && a.type() == GameAction.Type.GOODS).findAny().get().amount();
+                int incomingGoods = actions.stream().filter(a -> a.from().equals(s) && a.type() == GameAction.Type.GOODS).findAny().orElseThrow().amount();
                 return new SupplierEntry(incomingGoods);
             }));
             this.consumerData = distributor.consumers().stream().collect(Collectors.toMap(c -> c, c -> {
                 int initialOpenOrders = last.consumerData.get(c).get(Column.NEW_OPEN_ORDERS);
-                int incomingOrders = actions.stream().filter(a -> a.from().equals(c) && a.type() == GameAction.Type.ORDERS).findAny().get().amount();
+                int incomingOrders = actions.stream().filter(a -> a.from().equals(c) && a.type() == GameAction.Type.ORDERS).findAny().orElseThrow().amount();
                 return new ConsumerEntry(initialOpenOrders, incomingOrders);
             }));
         }
@@ -196,7 +196,7 @@ public class ScoreSheet {
             sb.append(" | ").append(" ".repeat(Math.max(0, c.toString().length() - vs.length()))).append(vs);
         }
 
-        private class SupplierEntry {
+        private static class SupplierEntry {
             private final int incomingGoods;
             private int outgoingOrders;
 
@@ -213,7 +213,7 @@ public class ScoreSheet {
             }
         }
 
-        private class ConsumerEntry {
+        private static class ConsumerEntry {
             private final int initialOpenOrders;
             private final int incomingOrders;
             private int outgoingGoods;
