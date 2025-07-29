@@ -1,6 +1,7 @@
 package nl.klaassen.lodewijk.beergame;
 
 import nl.klaassen.lodewijk.beergame.gamedata.DistributionChain;
+import nl.klaassen.lodewijk.beergame.gamedata.Distributor;
 import nl.klaassen.lodewijk.beergame.gamedata.gameplay.ScoreSheet;
 import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorType;
 
@@ -15,7 +16,7 @@ public class Main {
         System.out.println(distributionChain);
 
         for (DistributorType type : DistributorType.getDistributorTypes()) {
-            DistributionChain.Distributor distributor = distributionChain.getDistributor(type, distributionChain.getAmountOfDistributorsOfType(type));
+            Distributor distributor = distributionChain.getDistributor(type, distributionChain.getAmountOfDistributorsOfType(type));
             if (distributor != null) {
                 ScoreSheet scoreSheet = new ScoreSheet(distributor, 12, 4, 4);
                 System.out.println(scoreSheet);

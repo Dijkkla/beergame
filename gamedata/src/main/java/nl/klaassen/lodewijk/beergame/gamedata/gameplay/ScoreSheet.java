@@ -1,6 +1,6 @@
 package nl.klaassen.lodewijk.beergame.gamedata.gameplay;
 
-import nl.klaassen.lodewijk.beergame.gamedata.DistributionChain;
+import nl.klaassen.lodewijk.beergame.gamedata.Distributor;
 import nl.klaassen.lodewijk.beergame.gamedata.identifiers.DistributorId;
 
 import java.util.ArrayList;
@@ -13,10 +13,10 @@ import java.util.stream.Stream;
 
 public class ScoreSheet {
     private final int toStringLeftPad;
-    private final DistributionChain.Distributor distributor;
+    private final Distributor distributor;
     private final List<Entry> entries = new ArrayList<>();
 
-    public ScoreSheet(DistributionChain.Distributor distributor, int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
+    public ScoreSheet(Distributor distributor, int initialStock, int initialIncomingOrders, int initialIncomingGoods) {
         this.distributor = distributor;
         this.toStringLeftPad = Math.max(distributor.self().toString().length(), Stream.concat(distributor.consumers().stream(), distributor.suppliers().stream()).mapToInt(d -> d.toString().length()).max().orElse(5));
         entries.add(new Entry(initialStock, initialIncomingOrders, initialIncomingGoods));
