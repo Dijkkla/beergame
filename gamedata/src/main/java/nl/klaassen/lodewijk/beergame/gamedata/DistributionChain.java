@@ -13,7 +13,6 @@ public class DistributionChain {
     private final int numberOfConsumers;
     private final Map<DistributorType, Integer> amountOfDistributorsByType;
     private final int size;
-
     public DistributionChain(int chainNumber, int numberOfSuppliers, int numberOfConsumers) {
         this(chainNumber, numberOfSuppliers, numberOfConsumers, DistributorType.getDistributorTypes());
     }
@@ -71,6 +70,10 @@ public class DistributionChain {
 
     public int getAmountOfDistributorsOfType(DistributorType type) {
         return amountOfDistributorsByType.get(type);
+    }
+
+    public Set<Distributor> getDistributors() {
+        return Set.copyOf(distributors);
     }
 
     public Distributor getDistributor(DistributorId distributorId) {
