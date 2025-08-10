@@ -9,6 +9,7 @@
     <modules>
         <module>gamedata</module>
         <module>main</module>
+        <module>agent</module>
     </modules>
 
     <dependencyManagement>
